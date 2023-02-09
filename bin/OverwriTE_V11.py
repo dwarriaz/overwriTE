@@ -84,20 +84,20 @@ class OverwriTE:
         exonstoplist.pop(-1)
 
         for x in range (0,len(exonstartlist)):
-            
-            if self.repStrand == '+'
-            	calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-		repLen = len(range(self.repStart, self.repEnd))
-	    elif self.repStrand == '-'
+
+            if self.repStrand == '+':
+                calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                repLen = len(range(self.repStart, self.repEnd))
+            elif self.repStrand == '-': 
                 calculation = set(range(self.repEnd,self.repStart)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-		repLen = len(range(self.repEnd, self.repStart))
-            
-	    if len(calculation) == 0:
-                return self.package('Intron', repLen)
-            elif len(calculation) > 1 and calculation == repLen:
-                return self.package('Exon', repLen)
-            elif len(calculation) > 1 and calculation != repLen: 
-                return self.package('Junction', repLen)
+                repLen = len(range(self.repEnd, self.repStart))
+
+            if len(calculation) == 0:
+                 return self.package('Intron', repLen)
+            elif len(calculation) > 1 and len(calculation) == repLen:
+                 return self.package('Exon', repLen)
+            elif len(calculation) > 1 and len(calculation) != repLen: 
+                 return self.package('Junction', repLen)
                                 
                 
                         
