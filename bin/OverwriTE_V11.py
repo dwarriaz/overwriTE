@@ -82,22 +82,31 @@ class OverwriTE:
         exonstartlist.pop(-1)
         exonstoplist = self.exonEnds.split(',')
         exonstoplist.pop(-1)
+        
+        #print(self.name2, self.repName)
 
         for x in range (0,len(exonstartlist)):
+            
+            calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+            repLen = len(range(self.repStart, self.repEnd))
 
-            if self.repStrand == '+':
-                calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-                repLen = len(range(self.repStart, self.repEnd))
-            elif self.repStrand == '-': 
-                calculation = set(range(self.repEnd,self.repStart)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-                repLen = len(range(self.repEnd, self.repStart))
-
+            #if self.repStrand == '+':
+                #print(self.repStrand, self.repStart, self.repEnd)
+                #calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                #repLen = len(range(self.repStart, self.repEnd))
+            #elif self.repStrand == '-': 
+                #print(self.repStrand, self.repStart, self.repEnd)
+                #calculation = set(range(self.repEnd,self.repStart)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                #repLen = len(range(self.repEnd, self.repStart))
+            
+            #print(repLen, len(calculation))
+        
             if len(calculation) == 0:
                  return self.package('Intron', repLen)
             elif len(calculation) > 1 and len(calculation) == repLen:
-                 return self.package('Exon', repLen)
+                 return self.package('Exon', len(calculation))
             elif len(calculation) > 1 and len(calculation) != repLen: 
-                 return self.package('Junction', repLen)
+                 return self.package('Junction', len(calculation))
                                 
                 
                         
