@@ -1,0 +1,53 @@
+Feb-16 15:12:48.976 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+Feb-16 15:12:49.081 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 20.04.0
+Feb-16 15:12:49.092 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [drunk_volta] - revision: 326bd26476
+Feb-16 15:12:49.223 [main] DEBUG nextflow.Session - Session uuid: 2025a500-758f-40d6-83db-d79be4143ca2
+Feb-16 15:12:49.223 [main] DEBUG nextflow.Session - Run name: drunk_volta
+Feb-16 15:12:49.224 [main] DEBUG nextflow.Session - Executor pool size: 8
+Feb-16 15:12:49.243 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 20.04.0 build 5328
+  Created: 13-04-2020 20:03 UTC (13:03 PDT)
+  System: Mac OS X 10.16
+  Runtime: Groovy 2.5.11 on OpenJDK 64-Bit Server VM 1.8.0_332-b09
+  Encoding: UTF-8 (UTF-8)
+  Process: 11187@eduroam-169-233-217-23.ucsc.edu [169.233.217.23]
+  CPUs: 8 - Mem: 8 GB (141.2 MB) - Swap: 2 GB (1.2 GB)
+Feb-16 15:12:49.279 [main] DEBUG nextflow.Session - Work-dir: /Users/danielarriaza/KimLab/overwriTE/bin/work [Mac OS X]
+Feb-16 15:12:49.279 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /Users/danielarriaza/KimLab/overwriTE/bin/bin
+Feb-16 15:12:49.299 [main] DEBUG nextflow.Session - Observer factory: TowerFactory
+Feb-16 15:12:49.301 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Feb-16 15:12:49.484 [main] DEBUG nextflow.Session - Session start invoked
+Feb-16 15:12:49.990 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Feb-16 15:12:49.998 [main] DEBUG nextflow.Session - Workflow process names [dsl1]: 
+Feb-16 15:12:50.006 [main] DEBUG nextflow.Session - Session aborted -- Cause: Module feature not enabled -- Set `nextflow.preview.dsl=2` to import module files
+Feb-16 15:12:50.093 [main] ERROR nextflow.cli.Launcher - @unknown
+java.lang.IllegalStateException: Module feature not enabled -- Set `nextflow.preview.dsl=2` to import module files
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:80)
+	at org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSiteNoUnwrapNoCoerce.callConstructor(ConstructorSite.java:105)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallConstructor(CallSiteArray.java:59)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:237)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:249)
+	at nextflow.script.BaseScript.include(BaseScript.groovy:142)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:43)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:190)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:58)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:156)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:168)
+	at Script_51711dd8.runScript(Script_51711dd8:19)
+	at nextflow.script.BaseScript.runDsl1(BaseScript.groovy:157)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:193)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:225)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:218)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:126)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:273)
+	at nextflow.cli.Launcher.run(Launcher.groovy:460)
+	at nextflow.cli.Launcher.main(Launcher.groovy:642)

@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-nextflow.enable.dsl=2
+nextflow.preview.dsl=2
 
 def helpMessage() {
     log.info"""
@@ -16,7 +16,7 @@ if (params.help){
 }
 
 // Import modules from modules files
-include { Trimming_FastP } from './illumina_modules.nf'
+include { Overwrite_wrapper } from './modules.nf'
 
 
 
@@ -25,4 +25,13 @@ Star_index_Ch = Channel
             .fromPath("${params.INDEX}/star_host/")
 
 
-workflow{}
+workflow{
+    Overwrite_wrapper( 
+        file("${params.INPUT}"),
+        file("${projectDir}/File_Compatible.py"),
+        file("${projectDir}/OverwriTE_V5.sh"),
+        file("${projectDir}/OverwriTE_V11.py")
+
+
+    )
+}

@@ -1,0 +1,16 @@
+2023-02-16 15:07:01	-	elegant_torvalds	-	40a297bef972cf99ccd7ff787b072af4	f4531caf-c61e-4366-908c-6a93c73b2576	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:07:22	-	loving_poincare	-	326bd26476da317c78f6c7566160d7de	8faab6ad-b6ae-4a10-a6fc-f15310ef124c	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:10:31	-	scruffy_perlman	-	326bd26476da317c78f6c7566160d7de	6fa43f04-5c0b-4d9a-a76f-1f30f02754cd	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:11:15	-	voluminous_chandrasekhar	-	29a87e0218a5d8a73702a55ba09de8d2	4ed7063f-58a9-43b1-a0e4-58730bc160d1	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:11:54	-	prickly_liskov	-	29a87e0218a5d8a73702a55ba09de8d2	dbed902d-2028-4f4c-a75f-cb320ca590d7	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:12:13	-	insane_lamarr	-	712fde9376746c5f02522a8f8a255e5d	feef2012-58f2-4563-a7a6-7e8bf61bf0f9	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:12:49	-	drunk_volta	-	326bd26476da317c78f6c7566160d7de	2025a500-758f-40d6-83db-d79be4143ca2	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:12:59	2s	amazing_mayer	ERR	6cb5df86179f413f9366016f0456afa1	90e806cf-6e42-486b-ad7d-279bdee1eda7	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:14:30	-	confident_feynman	-	ad75595dfc34e1ca72885c7965f11cd0	e8faf70a-50f3-4fef-8afe-a068a0626074	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:14:40	2.5s	maniac_wing	ERR	5bed462b068ea17a6d6dbe5b61ff586b	3dc2ea3a-6b94-478d-9688-8f64eb55952c	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:15:03	1.7s	gigantic_ampere	ERR	5bed462b068ea17a6d6dbe5b61ff586b	98daf5d1-7f40-4743-984a-a620892a0369	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:16:42	2.7s	exotic_caravaggio	ERR	5bed462b068ea17a6d6dbe5b61ff586b	91f8cabb-ef22-4381-9c6a-3be12149b2a5	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:18:22	1.8s	peaceful_wozniak	ERR	5bed462b068ea17a6d6dbe5b61ff586b	c113dda3-7686-47cf-b0a1-3d001f98261f	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:18:33	3.8s	distracted_euclid	ERR	5bed462b068ea17a6d6dbe5b61ff586b	acb3ae82-13cc-4fb9-a3b7-c161705cb4ed	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:21:38	-	crazy_wescoff	-	5bed462b068ea17a6d6dbe5b61ff586b	91d76496-f7ee-4d3f-8bb3-225ae5ef7737	nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+2023-02-16 15:26:24	1m 6s	serene_swartz	ERR	5bed462b068ea17a6d6dbe5b61ff586b	57638e0b-1f21-4393-8680-e7e0a09be3df	nextflow run main.nf --INPUT ../test_data/test_data.tsv

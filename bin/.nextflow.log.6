@@ -1,0 +1,120 @@
+Feb-16 15:14:40.402 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --INPUT /Users/danielarriaza/KimLab/TE_Overlap/bin/LINC_list_uniqs.tsv
+Feb-16 15:14:40.513 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 20.04.0
+Feb-16 15:14:40.523 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [maniac_wing] - revision: 5bed462b06
+Feb-16 15:14:40.667 [main] DEBUG nextflow.Session - Session uuid: 3dc2ea3a-6b94-478d-9688-8f64eb55952c
+Feb-16 15:14:40.667 [main] DEBUG nextflow.Session - Run name: maniac_wing
+Feb-16 15:14:40.669 [main] DEBUG nextflow.Session - Executor pool size: 8
+Feb-16 15:14:40.686 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 20.04.0 build 5328
+  Created: 13-04-2020 20:03 UTC (13:03 PDT)
+  System: Mac OS X 10.16
+  Runtime: Groovy 2.5.11 on OpenJDK 64-Bit Server VM 1.8.0_332-b09
+  Encoding: UTF-8 (UTF-8)
+  Process: 11577@eduroam-169-233-217-23.ucsc.edu [169.233.217.23]
+  CPUs: 8 - Mem: 8 GB (40.4 MB) - Swap: 2 GB (1.2 GB)
+Feb-16 15:14:40.716 [main] DEBUG nextflow.Session - Work-dir: /Users/danielarriaza/KimLab/overwriTE/bin/work [Mac OS X]
+Feb-16 15:14:40.716 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /Users/danielarriaza/KimLab/overwriTE/bin/bin
+Feb-16 15:14:40.736 [main] DEBUG nextflow.Session - Observer factory: TowerFactory
+Feb-16 15:14:40.738 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Feb-16 15:14:40.891 [main] DEBUG nextflow.Session - Session start invoked
+Feb-16 15:14:41.438 [main] WARN  nextflow.NextflowMeta$Preview - DSL 2 IS AN EXPERIMENTAL FEATURE UNDER DEVELOPMENT -- SYNTAX MAY CHANGE IN FUTURE RELEASE
+Feb-16 15:14:41.441 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Feb-16 15:14:41.533 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `INDEX` -- Initialise it to a default value eg. `params.INDEX = some_value`
+Feb-16 15:14:41.594 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: Overwrite_wrapper
+Feb-16 15:14:41.649 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Feb-16 15:14:41.650 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Feb-16 15:14:41.653 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Feb-16 15:14:41.656 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=8; memory=8 GB; capacity=8; pollInterval=100ms; dumpInterval=5m
+Feb-16 15:14:41.755 [main] DEBUG nextflow.Session - Ignite dataflow network (2)
+Feb-16 15:14:41.763 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > Overwrite_wrapper
+Feb-16 15:14:41.764 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Feb-16 15:14:41.764 [main] DEBUG nextflow.Session - Session await
+Feb-16 15:14:41.890 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Feb-16 15:14:41.894 [Task submitter] INFO  nextflow.Session - [4e/8fff1a] Submitted process > Overwrite_wrapper
+Feb-16 15:14:42.104 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: Overwrite_wrapper; status: COMPLETED; exit: 1; error: -; workDir: /Users/danielarriaza/KimLab/overwriTE/bin/work/4e/8fff1a14d4520aa3784d634acc0cfb]
+Feb-16 15:14:42.149 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'Overwrite_wrapper'
+
+Caused by:
+  Process `Overwrite_wrapper` terminated with an error exit status (1)
+
+Command executed:
+
+  #!/bin/bash
+  
+  mkdir output
+  
+  python3 !file_Compatible_py $1
+  
+  start=1
+  end=20
+  
+  for (( c=$start; c<=$end; c++ ))
+  do
+  	echo 'Commencing Batch'$c
+  	## touch output/Batch$c
+  	!{overwritev5} output/Batch$c 
+  done
+  
+  echo 'name,name2,chrom,genoStrand,genoLength,repName,repStart,repLength,repFamily,repClass,repStrand,classification,len_classification' > output/OverwriTE_annotations.csv
+  
+  cat output/Batch?_output.csv|grep -v name,name2,chrom >> OverwriTE_annotations.csv
+
+Command exit status:
+  1
+
+Command output:
+  Commencing Batch1
+  Commencing Batch2
+  Commencing Batch3
+  Commencing Batch4
+  Commencing Batch5
+  Commencing Batch6
+  Commencing Batch7
+  Commencing Batch8
+  Commencing Batch9
+  Commencing Batch10
+  Commencing Batch11
+  Commencing Batch12
+  Commencing Batch13
+  Commencing Batch14
+  Commencing Batch15
+  Commencing Batch16
+  Commencing Batch17
+  Commencing Batch18
+  Commencing Batch19
+  Commencing Batch20
+
+Command error:
+  /Library/Frameworks/Python.framework/Versions/3.10/bin/python3: can't open file '!file_Compatible_py': [Errno 2] No such file or directory
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  .command.sh: line 14: !{overwritev5}: command not found
+  cat: output/Batch?_output.csv: No such file or directory
+
+Work dir:
+  /Users/danielarriaza/KimLab/overwriTE/bin/work/4e/8fff1a14d4520aa3784d634acc0cfb
+
+Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
+Feb-16 15:14:42.158 [main] DEBUG nextflow.Session - Session await > all process finished
+Feb-16 15:14:42.160 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Process `Overwrite_wrapper` terminated with an error exit status (1)
+Feb-16 15:14:42.176 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Feb-16 15:14:42.186 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=762ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=6; peakMemory=0; ]
+Feb-16 15:14:42.375 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Feb-16 15:14:42.477 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
