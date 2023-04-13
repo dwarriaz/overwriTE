@@ -47,12 +47,12 @@ class OverwriTE:
         self.repFamily = row[12]
         self.repClass = row[13]
         self.repStrand = row[14]
-        self.cdsStart = row[15]
-        self.cdsEnd = row[16]
+        self.cdsStart = int( row[15])
+        self.cdsEnd = int(row[16])
 
     def package(self,classification,len_classification):
         #LTR7C_range=chr5:43320822-43321290_strand=-
-        complete_seq_name = self.repName +'_range='+self.chrom+':'+self.repStart+'-'+self.repEnd+'_strand='+self.repStrand
+        complete_seq_name = self.repName +'_range='+self.chrom+':'+str(self.repStart)+'-'+str(self.repEnd)+'_strand='+self.repStrand
 
         OverwriTE_entry = [self.name, self.name2, self.chrom, self.genoStrand,(self.txEnd-self.txStart), self.repName, 
                            self.repStart,(self.repEnd-self.repStart),self.repFamily, self.repClass, self.repStrand, classification,len_classification,
