@@ -51,9 +51,12 @@ class OverwriTE:
         self.cdsEnd = row[16]
 
     def package(self,classification,len_classification):
-              
+        #LTR7C_range=chr5:43320822-43321290_strand=-
+        complete_seq_name = self.repName +'_range='+self.chrom+':'+self.repStart+'-'+self.repEnd+'_strand='+self.repStrand
+
         OverwriTE_entry = [self.name, self.name2, self.chrom, self.genoStrand,(self.txEnd-self.txStart), self.repName, 
-                           self.repStart,(self.repStart-self.repEnd),self.repFamily, self.repClass, self.repStrand, classification,len_classification]
+                           self.repStart,(self.repEnd-self.repStart),self.repFamily, self.repClass, self.repStrand, classification,len_classification,
+                           complete_seq_name]
         return OverwriTE_entry
         
     def classification(self):
@@ -65,24 +68,37 @@ class OverwriTE:
                 return self.package('Promoter_Region',len(range(self.repStart, self.repEnd,1)))   
             
             elif self.txStart in repSet:
-                return self.package('Transcription_Start_Site',len(range(self.repStart, self.repEnd,1)))
+                return self.package('Transcription_Start_Site',self.txStart)
             
             elif repSet.intersection(set(range(self.txStart, self.cdsStart,1))) != 0 and len(repSet.intersection(set(range(self.txStart, self.cdsStart,1)))) == len(repSet): 
                 return self.package('5UTR', len(repSet)) 
                 
             elif self.txEnd in repSet:
-                return self.package('Transcription_End_Site',len(repSet.intersection(range)))
+                return self.package('Transcription_End_Site',self.txEnd)
+
+            elif repSet.intersection(set(range(self.cdsEnd, self.txEnd,1))) != 0 and len(repSet.intersection(set(range(self.cdsEnd, self.txEnd,1)))) == len(repSet): 
+                return self.package('3UTR', len(repSet)) 
             
             elif self.repStart in range(self.txEnd,(self.txEnd + 300),1):
                 return self.package ('3UTR_Region',len(range(self.repStart, self.repEnd,1)))
         
         elif self.genoStrand == '-':
+
             if self.repStart > self.txEnd:
                 return self.package('Promoter_Region',len(range(self.repStart, self.repEnd,1)))
+
             elif self.txEnd in range(self.repStart, self.repEnd,1):
-                return self.package('Transcription_Start_Site',len(range(self.repStart, self.repEnd,1)))
+                return self.package('Transcription_Start_Site',self.txEnd)
+
+            elif repSet.intersection(set(range(self.cdsEnd, self.txEnd,1))) != 0 and len(repSet.intersection(set(range(self.cdsEnd, self.txEnd,1)))) == len(repSet): 
+                return self.package('5UTR', len(repSet)) 
+
             elif self.txStart in range(self.repStart,self.repEnd):
-                return self.package('Transcription_End_Site',len(range(self.repStart, self.repEnd,1)))
+                return self.package('Transcription_End_Site',self.txStart)
+
+            elif repSet.intersection(set(range(self.txStart, self.cdsStart,1))) != 0 and len(repSet.intersection(set(range(self.txStart, self.cdsStart,1)))) == len(repSet): 
+                return self.package('3UTR', len(repSet)) 
+
             elif self.repStart in range((self.txStart-300),self.txStart,1):
                 return self.package('3UTR_Region',len(range(self.repStart, self.repEnd,1)))
         
@@ -93,23 +109,12 @@ class OverwriTE:
         exonstoplist = self.exonEnds.split(',')
         exonstoplist.pop(-1)
         
-        #print(self.name2, self.repName)
 
         for x in range (0,len(exonstartlist)):
             
             calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
             repLen = len(range(self.repStart, self.repEnd))
 
-            #if self.repStrand == '+':
-                #print(self.repStrand, self.repStart, self.repEnd)
-                #calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-                #repLen = len(range(self.repStart, self.repEnd))
-            #elif self.repStrand == '-': 
-                #print(self.repStrand, self.repStart, self.repEnd)
-                #calculation = set(range(self.repEnd,self.repStart)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-                #repLen = len(range(self.repEnd, self.repStart))
-            
-            #print(repLen, len(calculation))
         
             if len(calculation) == 0:
                  return self.package('Intron', repLen)
@@ -133,7 +138,7 @@ def main():
     result = [OverwriTE(row).classification() for row in table]
     
     overlaps = pd.DataFrame(result, columns = ['name', 'name2', 'chrom', 'genoStrand','genoLength', 'repName', 
-                           'repStart','repLength', 'repFamily', 'repClass', 'repStrand', 'classification', 'len_classification'])
+                           'repStart','repLength', 'repFamily', 'repClass', 'repStrand', 'classification', 'len_classification','compleTE_seq'])
     overlaps.to_csv(ThisCommandLine.args.Output, index = False)
     
 
