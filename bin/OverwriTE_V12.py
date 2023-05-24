@@ -51,7 +51,6 @@ class OverwriTE:
         self.cdsEnd = int(row[16])
 
     def package(self,classification,len_classification):
-        #LTR7C_range=chr5:43320822-43321290_strand=-
         complete_seq_name = self.repName +'_range='+self.chrom+':'+str(self.repStart)+'-'+str(self.repEnd)+'_strand='+self.repStrand
 
         OverwriTE_entry = [self.name, self.name2, self.chrom, self.genoStrand,(self.txEnd-self.txStart), self.repName, 
@@ -69,19 +68,57 @@ class OverwriTE:
             
             elif self.txStart in repSet:
                 return self.package('Transcription_Start_Site',self.txStart)
-            
-            elif repSet.intersection(set(range(self.txStart, self.cdsStart,1))) != 0 and len(repSet.intersection(set(range(self.txStart, self.cdsStart,1)))) == len(repSet): 
-                return self.package('5UTR', len(repSet)) 
                 
             elif self.txEnd in repSet:
                 return self.package('Transcription_End_Site',self.txEnd)
-
-            elif repSet.intersection(set(range(self.cdsEnd, self.txEnd,1))) != 0 and len(repSet.intersection(set(range(self.cdsEnd, self.txEnd,1)))) == len(repSet): 
-                return self.package('3UTR', len(repSet)) 
             
             elif self.repStart in range(self.txEnd,(self.txEnd + 300),1):
-                return self.package ('3UTR_Region',len(range(self.repStart, self.repEnd,1)))
+                return self.package ('3_End_Region',len(range(self.repStart, self.repEnd,1)))
+
+            elif self.txStart == self.cdsStart and self.cdsEnd == self.cdsStart:
+                exonstartlist = self.exonStarts.split(',')
+                exonstartlist.pop(-1)
+                exonstoplist = self.exonEnds.split(',')
+                xonstoplist.pop(-1)
+
+                for x in range (0,len(exonstartlist)):
+            
+                    calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                    repLen = len(range(self.repStart, self.repEnd))
+
+                    if len(calculation) == 0:
+                        return self.package('Intron', repLen)
+                    elif len(calculation) > 1 and len(calculation) == repLen:
+                        return self.package('Exon', len(calculation))
+                    elif len(calculation) > 1 and len(calculation) != repLen: 
+                        return self.package('Junction', len(calculation))
+            
+            else:
+
+                exonstartlist = self.exonStarts.split(',')
+                exonstartlist.pop(-1)
+                exonstoplist = self.exonEnds.split(',')
+                exonstoplist.pop(-1)
         
+
+                for x in range (0,len(exonstartlist)):
+            
+                    calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                    repLen = len(range(self.repStart, self.repEnd))
+
+        
+                    if len(calculation) == 0:
+                        return self.package('Intron', repLen)
+                    elif len(calculation) >1 and self.repStart < self.cdsStart:
+                        return self.package('5UTR', len(calculation))
+                    elif len(calculation) >1 and self.repEnd > self.cdsEnd:
+                        return self.package('3UTR', len(calculation))
+                    elif len(calculation) > 1 and len(calculation) == repLen:
+                        return self.package('Exon', len(calculation))
+                    elif len(calculation) > 1 and len(calculation) != repLen: 
+                        return self.package('Junction', len(calculation))
+
+
         elif self.genoStrand == '-':
 
             if self.repStart > self.txEnd:
@@ -90,41 +127,58 @@ class OverwriTE:
             elif self.txEnd in range(self.repStart, self.repEnd,1):
                 return self.package('Transcription_Start_Site',self.txEnd)
 
-            elif repSet.intersection(set(range(self.cdsEnd, self.txEnd,1))) != 0 and len(repSet.intersection(set(range(self.cdsEnd, self.txEnd,1)))) == len(repSet): 
-                return self.package('5UTR', len(repSet)) 
-
             elif self.txStart in range(self.repStart,self.repEnd):
                 return self.package('Transcription_End_Site',self.txStart)
 
-            elif repSet.intersection(set(range(self.txStart, self.cdsStart,1))) != 0 and len(repSet.intersection(set(range(self.txStart, self.cdsStart,1)))) == len(repSet): 
-                return self.package('3UTR', len(repSet)) 
-
             elif self.repStart in range((self.txStart-300),self.txStart,1):
-                return self.package('3UTR_Region',len(range(self.repStart, self.repEnd,1)))
-        
-        
-        
-        exonstartlist = self.exonStarts.split(',')
-        exonstartlist.pop(-1)
-        exonstoplist = self.exonEnds.split(',')
-        exonstoplist.pop(-1)
-        
+                return self.package('3_End_Region',len(range(self.repStart, self.repEnd,1)))
 
-        for x in range (0,len(exonstartlist)):
+            elif self.txStart == self.cdsStart and self.cdsEnd == self.cdsStart:
+                exonstartlist = self.exonStarts.split(',')
+                exonstartlist.pop(-1)
+                exonstoplist = self.exonEnds.split(',')
+                exonstoplist.pop(-1)
+
+                for x in range (0,len(exonstartlist)):
             
-            calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
-            repLen = len(range(self.repStart, self.repEnd))
+                    calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                    repLen = len(range(self.repStart, self.repEnd))
 
-        
-            if len(calculation) == 0:
-                 return self.package('Intron', repLen)
-            elif len(calculation) > 1 and len(calculation) == repLen:
-                 return self.package('Exon', len(calculation))
-            elif len(calculation) > 1 and len(calculation) != repLen: 
-                 return self.package('Junction', len(calculation))
-                                
-                
-                        
+                    if len(calculation) == 0:
+                        return self.package('Intron', repLen)
+                    elif len(calculation) > 1 and len(calculation) == repLen:
+                        return self.package('Exon', len(calculation))
+                    elif len(calculation) > 1 and len(calculation) != repLen: 
+                        return self.package('Junction', len(calculation))
+
+
+
+            else:
+                exonstartlist = self.exonStarts.split(',')
+                exonstartlist.pop(-1)
+                exonstoplist = self.exonEnds.split(',')
+                exonstoplist.pop(-1)
+
+
+                for x in range (0,len(exonstartlist)):
+
+                    calculation = set(range(self.repStart,self.repEnd)).intersection(range(int(exonstartlist[x]),int(exonstoplist[x])))
+                    repLen = len(range(self.repStart, self.repEnd))
+
+
+                    if len(calculation) == 0:
+                        return self.package('Intron', repLen)
+                    elif len(calculation) > 1 and self.repEnd > self.cdsEnd:
+                        return self.package('5UTR',len(calculation))
+                    elif len(calculation) > 1 and self.repStart < self.cdsStart:
+                        return self.package('3UTR',len(calculation))
+                    elif len(calculation) > 1 and len(calculation) == repLen:
+                        return self.package('Exon', len(calculation))
+                    elif len(calculation) > 1 and len(calculation) != repLen: 
+                        return self.package('Junction', len(calculation))
+
+
+
 def main():
     
     ThisCommandLine = CommandLine()

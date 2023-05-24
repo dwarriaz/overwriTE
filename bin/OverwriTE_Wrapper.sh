@@ -5,12 +5,12 @@ mkdir output
 python3 File_Compatible.py $1
 
 start=1
-end=21
+end=308
 
 for (( c=$start; c<=$end; c++ ))
 do
 	echo 'Commencing Batch'$c
-	## touch output/Batch$c
+	touch output/Batch$c
 	./OverwriTE_V5.sh output/Batch$c 
 done
 
