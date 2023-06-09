@@ -20,10 +20,10 @@ mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D hg38 -e \
 	rmsk.strand,
     cdsStart,
     cdsEnd
-    from wgEncodeGencodeBasicV43 as wg, rmsk 
+    from wgEncodeGencodeBasicV39 as wg, rmsk 
     where name2 in'$query_list'and 
 	wg.chrom = rmsk.genoName and 
 	cast(wg.txStart as signed)-1500 <= cast(rmsk.genoStart as signed)and
 	cast(wg.txEnd as signed)+1500 >= cast(rmsk.genoEnd as signed);'\
     > $1_sql_out.tsv &&\
-     python3 -u OverwriTE_V12.py -SQL $1_sql_out.tsv -Output $1_output.csv 
+     python3 -u OverwriTE_V13.py -SQL $1_sql_out.tsv -Output $1_output.csv 

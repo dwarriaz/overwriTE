@@ -1,0 +1,664 @@
+---
+title: "AMG_inhib_TE_interrogation"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+```
+
+THEME: Kim_Lab by Roman Reggiardo 
+
+```{r}
+base_size = 8
+ggplot2::theme_set(ggthemes::theme_foundation(base_size = base_size,
+                                              base_family = 'Helvetica') + 
+                     theme(plot.title = element_text(size = base_size, face = 'bold'),
+                           panel.background = element_rect(colour = NA),
+                           plot.background = element_rect(colour = NA),
+                           panel.border = element_rect(colour = NA), 
+                           axis.line = element_line(), 
+                           axis.line.x = NULL, 
+                           axis.line.y = NULL, 
+                           axis.text = element_text(size = rel(0.95)), 
+                           axis.text.x = element_text(margin = 
+                                                        margin(t = 0.8 * base_size/4)), 
+                           axis.text.x.top = element_text(margin = 
+                                                            margin(b = 0.8 * base_size/4), 
+                                                          vjust = 0), 
+                           axis.text.y = element_text(margin = 
+                                                        margin(r = 0.5 * base_size/4), 
+                                                      hjust = 1),
+                           axis.text.y.right = element_text(margin = 
+                                                              margin(l = 0.5 * base_size/4), 
+                                                            hjust = 0), 
+                           axis.ticks = element_line(), 
+                           axis.ticks.length = unit(base_size/2.5, "pt"), axis.ticks.length.x = NULL, 
+                           axis.ticks.length.x.top = NULL, axis.ticks.length.x.bottom = NULL, 
+                           axis.ticks.length.y = NULL, axis.ticks.length.y.left = NULL, 
+                           axis.ticks.length.y.right = NULL,
+                           strip.text = element_text(size = rel(0.8), face = 'bold'),
+                           strip.background = element_blank(),
+                           legend.key.size= unit(0.08, "in"),
+                           legend.spacing = unit(0, "in"),
+                           legend.key = element_rect(colour = NA),
+                           legend.title = element_text(face="italic"),
+                           legend.text = element_text(face = 'bold'),
+                           legend.justification = c("right", "top"),
+                           legend.box.just = "right",
+                           legend.margin = margin(6, 6, 6, 6),
+                           plot.tag = element_text(size = base_size, face = 'bold'),
+                           plot.margin=margin(0.04,
+                                              0.04,
+                                              0.04,
+                                              0.04,
+                                              unit = "in"),
+                           legend.box.spacing = unit(-0.02, 'in'),
+                           panel.grid.major = element_blank(),
+                           panel.grid.minor = element_blank()
+                     )
+)
+
+txt.mm_to_pts <- function(ratio){ base_size * ratio * (25.4 / 72.27) }
+
+three_color_pal <- RColorBrewer::brewer.pal(n = 4, 'Dark2')
+eight_color_pal <- RColorBrewer::brewer.pal(n = 8, 'Dark2')
+viridis_three_color_pal <- viridis::plasma(20)[c(1,9,16)]
+
+te_aware_annotation_levels <- c('gencode_coding',
+                                'gencode_lncRNA',
+                                'LINE',
+                                'SINE',
+                                'LTR',
+                                'DNA',
+                                'Simple_repeat',
+                                'other')
+
+te_color_pal <- c('grey', RColorBrewer::brewer.pal(n = 7, 'Dark2'))
+names(te_color_pal) <- te_aware_annotation_levels
+
+te_alone_annotation_levels <- c('LINE',
+                                'SINE',
+                                'LTR',
+                                'DNA',
+                                'Simple_repeat',
+                                'rRNA',
+                                'tRNA')
+te_alone_color_pal <- RColorBrewer::brewer.pal(n = 8, 'Dark2')[2:8]
+names(te_alone_color_pal) <- te_alone_annotation_levels
+
+```
+
+FUNCTIONS 
+
+```{r}
+background_TE_coverage <- function(wg_background) {
+  wg_background %>%
+    filter(classification %in% c('Promoter_Region', '5UTR', 'Exon',
+                                 '3UTR', '3_End_Region')) %>%
+    merge(
+      transcript_to_gene %>% select(ensg, enst, biotype),
+      by.x = 'name',
+      by.y = 'enst'
+    ) %>%
+    mutate(expression = 'background') %>%
+    filter(!grepl('\\?', repClass)) %>%
+    filter(!grepl('RNA', repClass)) %>%
+    filter(repClass != 'Unknown') %>%
+    filter(repClass != 'Low_complexity') %>%
+    filter(classification != 'Intron') %>%
+    group_by(name2) %>%
+    mutate(isoform_count = n_distinct(name)) %>%
+    ungroup() %>%
+    mutate(TE_coverage = repLength / regionLength / isoform_count) %>%
+    distinct()
+}
+
+differential_TE_coverage <-
+  function(dif_exp_data,
+           background_data,
+           desired_biotype) {
+    dif_exp_data %>%
+      merge(background_data, by.x = 'gene', by.y = 'name2') %>%
+      filter(biotype == desired_biotype) %>%
+      mutate(
+        expression = case_when(
+          log2FoldChange == NA ~ NA,
+          log2FoldChange > 0 ~ 'up',
+          log2FoldChange < 0 ~ 'down'
+        )
+      ) %>%
+      select(
+        gene,
+        genoLength,
+        biotype,
+        log2FoldChange,
+        padj,
+        repName,
+        repFamily,
+        repClass,
+        repStart,
+        expression,
+        classification,
+        TE_coverage
+      ) %>%
+      distinct()
+  }
+
+```
+
+
+DATA 
+
+```{r}
+
+transcript_to_gene <- vroom::vroom('/home/dwarriaz/data/overwriTE/docs/clean.gencode.v39.tx.to.gene.csv',
+                                   delim = '|')
+
+colnames(transcript_to_gene) <- c('enst', 'ensg', 'biotype', 'gene')
+
+wg_background <- vroom::vroom('/home/dwarriaz/data/overwriTE/bin/overwriTE.gencodev39.6.1.23.csv',
+                              delim = ',')
+
+dynamic_region_background <- background_TE_coverage(wg_background)
+
+## Differential Expression Data from ExoTIC and ExoRNeasy 
+
+exotic <-read_csv('/home/dwarriaz/data/amg-kras-inhib/exoTIC_total_DE.csv')
+
+exorneasy <- read_csv('/home/dwarriaz/data/amg-kras-inhib/rnaEASY_total_DE.csv')
+
+ExoTIC_protein_coding <- differential_TE_coverage(exotic,dynamic_region_background,'protein_coding') %>% 
+  mutate(isolation = 'ExoTIC')
+
+ExoRNeasy_protein_coding <- differential_TE_coverage(exorneasy,dynamic_region_background,'protein_coding') %>% 
+  mutate(isolation = 'ExoRNeasy')
+
+
+ExoTIC_lncRNA <-
+  differential_TE_coverage(exotic, dynamic_region_background, 'lncRNA') %>%
+  mutate(isolation = 'ExoTIC')
+
+ExoRNeasy_lncRNA <-
+  differential_TE_coverage(exorneasy, dynamic_region_background, 'lncRNA') %>%
+  mutate(isolation = 'ExoRNeasy')
+
+
+```
+
+Figure2 Panel A 
+
+```{r}
+ExoTIC_protein_coding %>%
+  merge(
+    ExoRNeasy_protein_coding,
+    by = c(
+      'gene',
+      'classification',
+      'repName',
+      'repStart',
+      'repClass',
+      'biotype'
+    )
+  ) %>%
+  filter(repClass != 'Simple_repeat') %>% 
+  group_by(gene,
+           biotype,
+           repClass,
+           classification,
+           log2FoldChange.x,
+           log2FoldChange.y) %>%
+  summarise(total_metric = sum(TE_coverage.x)) %>%
+  distinct() %>% 
+ggplot(aes(x = log2FoldChange.x, y = log2FoldChange.y, weight = total_metric)) +
+  geom_hex(bins = 30, size = 0.5) +
+  geom_hline(yintercept = 0,
+             linetype = 'dashed',
+             color = 'grey') +
+  geom_vline(xintercept = 0,
+             linetype = 'dashed',
+             color = 'grey') +
+  scale_fill_viridis_c(name = 'TE per Isoform') +
+  xlab(label = 'log2FoldChange for ExoTIC isolated transcripts') +
+  ylab(label = 'log2FoldChange for ExoRNeasy isolated transcripts') +
+  theme(legend.position = c(0.7, 0.25),
+        legend.direction = 'horizontal') #-> Fig2.PanelA
+
+```
+
+Figure2 Panel B 
+```{r}
+
+total_extracellular_protein_coding <-
+  ExoTIC_protein_coding %>%
+  rbind(ExoRNeasy_protein_coding)
+
+exo_protein_coding_observed <-
+  read_csv(
+    '/home/dwarriaz/data/amg-kras-inhib/exoTIC_detected_coding_names.txt',
+    col_names = 'ensg'
+  ) %>%
+  mutate(isolation = 'ExoTIC') %>%
+  rbind(
+    read_csv(
+      '/home/dwarriaz/data/amg-kras-inhib/exoRNeasy_detected_coding_names.txt',
+      col_names = 'ensg'
+    ) %>% mutate(isolation = 'ExoRNeasy')
+  )
+
+total_extracellular_observed_protein_coding <-
+  exo_protein_coding_observed %>%
+  merge(dynamic_region_background, by.x = 'ensg', by.y = 'ensg') %>%
+  select(
+    name2,
+    repName,
+    repClass,
+    repStart,
+    expression,
+    classification,
+    TE_coverage,
+    isolation,
+    biotype
+  ) %>%
+  distinct() %>%
+  filter(biotype == 'protein_coding')
+
+
+total_extracellular_protein_coding %>%
+  filter(biotype == 'protein_coding') %>%
+  filter(padj <= 0.05) %>%
+  mutate(name2 = gene) %>%
+  
+  group_by(name2) %>%
+  mutate(avg_log2FoldChange = mean(log2FoldChange)) %>%
+  
+  select(
+    name2,
+    repName,
+    repStart,
+    repClass,
+    expression,
+    classification,
+    TE_coverage,
+    avg_log2FoldChange
+  ) %>%
+  rbind(total_extracellular_observed_protein_coding) %>%
+  filter(!repClass %in% c('RC', 'Simple_repeat', 'Retroposon', 'Satellite')) %>%
+  mutate(classification = factor(
+    classification,
+    levels = c('Promoter_Region',
+               '5UTR',
+               'Exon',
+               '3UTR',
+               '3_End_Region')
+  )) %>%
+  group_by(name2,
+           expression,
+           repClass,
+           classification,
+           avg_log2FoldChange) %>%
+  summarise(TE_coverage = sum(TE_coverage)) %>%
+  ggplot(aes(x = expression, y = TE_coverage, color = avg_log2FoldChange)) +
+  geom_jitter(aes(fill = after_scale(alpha(color, 0.4))), width = 0.125, shape = 21) +
+  geom_boxplot(fill = NA, outlier.shape = NA) +
+  ylab('TE_Coverage') +
+  xlab('Expression') +
+  facet_wrap(
+    ~ repClass+classification,
+    scales = 'free',
+    ncol = 5,
+    strip.position = 'bottom'
+  ) +
+  scale_color_gradient2(
+    low = "blue" ,
+    mid = "grey" ,
+    high = "red",
+    space = "Lab",
+    midpoint = 0
+  ) +
+  ggpubr::stat_compare_means(
+    method = "wilcox",
+    size = 3,
+    comparisons = list(c('up', 'background'),
+                       c('up', 'down')),
+    method.args = list(alternative = 'greater')
+  ) +
+  coord_cartesian(clip = 'off') +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal') #-> Fig2.PanelB
+
+```
+
+
+lncBoxplots 
+```{r}
+
+total_extracellular_lncRNA <-
+  ExoTIC_lncRNA %>%
+  rbind(ExoRNeasy_lncRNA)
+
+exo_lnc_observed <-
+  read_csv(
+    '/home/dwarriaz/data/amg-kras-inhib/exoTIC_detected_coding_names.txt',
+    col_names = 'ensg'
+  ) %>%
+  mutate(isolation = 'ExoTIC') %>%
+  rbind(
+    read_csv(
+      '/home/dwarriaz/data/amg-kras-inhib/exoRNeasy_detected_coding_names.txt',
+      col_names = 'ensg'
+    ) %>% mutate(isolation = 'ExoRNeasy')
+  )
+
+total_extracellular_observed_lncRNA <-
+  exo_lnc_observed %>%
+  merge(dynamic_region_background, by.x = 'ensg', by.y = 'ensg') %>%
+  select(
+    name2,
+    repName,
+    repClass,
+    repStart,
+    expression,
+    classification,
+    TE_coverage,
+    isolation,
+    biotype
+  ) %>%
+  distinct() %>%
+  filter(biotype == 'lncRNA')
+
+
+total_extracellular_lncRNA %>%
+  filter(biotype == 'lncRNA') %>%
+  filter(padj <= 0.05) %>%
+  mutate(name2 = gene) %>% 
+  
+  group_by(name2) %>%
+  mutate(avg_log2FoldChange = mean(log2FoldChange)) %>%
+  
+  select(
+    name2,
+    repName,
+    repStart,
+    repClass,
+    expression,
+    classification,
+    TE_coverage,
+    avg_log2FoldChange
+  ) %>%
+  rbind(total_extracellular_observed_lncRNA) %>%
+  filter(!repClass %in% c('RC', 'Simple_repeat', 'Retroposon', 'Satellite')) %>%
+  mutate(classification = factor(
+    classification,
+    levels = c('Promoter_Region',
+               #'5UTR',
+               'Exon',
+               #'3UTR',
+               '3_End_Region')
+  )) %>%
+  group_by(name2,
+           expression,
+           repClass,
+           classification,
+           avg_log2FoldChange) %>%
+  summarise(TE_coverage = sum(TE_coverage)) %>%
+  ggplot(aes(x = expression, y = TE_coverage, color = avg_log2FoldChange)) +
+  geom_jitter(aes(fill = after_scale(alpha(color, 0.4))), width = 0.125, shape = 21) +
+  geom_boxplot(fill = NA, outlier.shape = NA) +
+  ylab('TE_Coverage') +
+  xlab('Expression') +
+  facet_wrap(
+    ~ repClass+classification,
+    scales = 'free',
+    ncol = 3,
+    strip.position = 'bottom'
+  ) +
+  scale_color_gradient2(
+    low = "blue" ,
+    mid = "grey" ,
+    high = "red",
+    space = "Lab",
+    midpoint = 0
+  ) +
+  ggpubr::stat_compare_means(
+    method = "wilcox",
+    size = 3,
+    comparisons = list(c('up', 'background'),
+                       c('up', 'down')),
+    method.args = list(alternative = 'greater')
+  ) +
+  coord_cartesian(clip = 'off') +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal') #-> lncRNA_boxplots
+
+```
+
+
+Figure2 Panel E
+
+```{r}
+total_extracellular_protein_coding %>% 
+  filter(biotype == 'protein_coding') %>% 
+  filter(padj <= 0.05) %>%
+  mutate(name2 = gene) %>% 
+  
+  group_by(name2) %>% 
+  mutate(avg_log2FoldChange = mean(log2FoldChange)) %>% 
+  
+  select(name2,repName, repStart, repClass,expression,classification,rep_per_iso_kb_mean, avg_log2FoldChange) %>%
+  rbind(total_extracellular_observed_protein_coding) %>% 
+  select(name2,repName,repStart,repClass,expression,classification,rep_per_iso_kb_mean, avg_log2FoldChange) %>% 
+  distinct() %>% 
+  
+  filter(!repClass %in% c('Retroposon','Satellite','RC')) %>% 
+  mutate(classification = factor(classification, levels = c('Promoter_Region',
+                                                            '5UTR',
+                                                            'Transcription_Start_Site',
+                                                            'Exon',
+                                                            'Junction',
+                                                            '3UTR',
+                                                            'Transcription_End_Site',
+                                                            '3UTR_End_Region'))) %>% 
+  
+  filter(classification == 'Junction' & repClass == 'LINE' | classification == '3UTR' & repClass == 'SINE' ) %>% 
+  group_by(name2, repClass, expression, classification,avg_log2FoldChange) %>%
+  summarize(rep_per_iso_kb_mean = sum(rep_per_iso_kb_mean)) %>%
+  ggplot(aes(x=expression, y=log(rep_per_iso_kb_mean),color = avg_log2FoldChange)) +
+  geom_boxplot(fill=NA,outlier.shape = NA) +
+  geom_jitter(aes(fill = after_scale(alpha(color, 0.4))),width=0.125, shape = 21)+
+  ylab('log( TE per (Isoform / kB)') +
+  xlab('Expression') +
+  facet_wrap(~repClass+classification,scales='free', ncol = 2, strip.position = 'bottom') +
+  scale_color_gradient2(low = "blue" , mid = "grey" , high = "red", space = "Lab", midpoint = 0) +
+  # ggtitle('TE Enrichment in the Promoter Region for Differentially Expressed Genes') +
+  ggpubr::stat_compare_means(method = "wilcox",size=3, comparisons = list(c('Up', 'background'),
+                                                                          c('Up', 'Down')), 
+                             method.args = list(alternative = 'greater')) +
+  coord_cartesian(clip='off') +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal') #-> Fig2.PanelE
+```
+
+Supplemental Full Boxplots
+
+```{r}
+total_extracellular_protein_coding %>% 
+  filter(biotype == 'protein_coding') %>% 
+  filter(padj <= 0.05) %>%
+  mutate(name2 = gene) %>% 
+  
+  group_by(name2) %>% 
+  mutate(avg_log2FoldChange = mean(log2FoldChange)) %>% 
+  
+  select(name2,repName, repStart, repClass,expression,
+         classification,rep_per_iso_kb_mean, avg_log2FoldChange) %>%
+  rbind(total_extracellular_observed_protein_coding) %>% 
+  select(name2,repName,repStart,repClass,expression,
+         classification,rep_per_iso_kb_mean, avg_log2FoldChange) %>% 
+  distinct() %>% 
+  filter(!repClass %in% c('Retroposon','Satellite','RC')) %>% 
+  mutate(classification = factor(classification, levels = c('Promoter_Region',
+                                                      'Transcription_Start_Site',
+                                                            '5UTR',
+                                                            'Exon',
+                                                            'Junction',
+                                                            '3UTR',
+                                                      'Transcription_End_Site',
+                                                            '3_End_Region'))) %>% 
+  filter(repClass %in% c('LTR', 'LINE', 'SINE', 'DNA')) %>% 
+  filter(classification != 'Promoter_Region') %>% 
+  group_by(name2, repClass, expression, classification,avg_log2FoldChange) %>%
+  summarize(rep_per_iso_kb_mean = sum(rep_per_iso_kb_mean)) %>%
+  ggplot(aes(x=expression, y=-log(rep_per_iso_kb_mean) ,color = avg_log2FoldChange)) +
+  geom_boxplot(fill=NA,outlier.shape = NA) +
+  geom_jitter(aes(fill = after_scale(alpha(color, 0.4))),width=0.125, shape = 21)+
+  ylab('log( TE per (Isoform / kB)') +
+  xlab('Expression') +
+  facet_wrap(~repClass+classification,scales='free', ncol = 7, strip.position = 'bottom') +
+  scale_color_gradient2(low = "blue" , mid = "grey" , high = "red", space = "Lab", midpoint = 0) +
+  ggpubr::stat_compare_means(method = "wilcox",size=3, comparisons = list(c('up', 'background'),
+                                                                          c('up', 'down')), 
+                             method.args = list(alternative = 'greater')) +
+  coord_cartesian(clip='off') +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal')#->
+  #Supplemental_Figure.Full_Boxplots
+
+```
+
+Supplemental Full Hexbins
+
+```{r}
+ExoTIC_rep %>% 
+  merge(ExoRNeasy_rep, by = c('gene','classification', 
+                              'repName','repStart','repClass','biotype')) %>% 
+  filter(biotype %in% c('lncRNA', 'protein_coding')) %>% 
+  group_by(gene, biotype, log2FoldChange.x, log2FoldChange.y,classification) %>% 
+  summarise(total_metric = sum(rep_per_iso_kb_mean.x)) %>% 
+  distinct() %>% 
+  mutate(classification = factor(classification, levels = c('Promoter_Region',
+                                                            'Transcription_Start_Site',
+                                                            '5UTR',
+                                                            'Exon',
+                                                            'Junction',
+                                                            '3UTR',
+                                                            'Transcription_End_Site',
+                                                            '3_End_Region'))) %>% 
+  ggplot(aes(x=log2FoldChange.x,y=log2FoldChange.y, weight=total_metric)) +
+  facet_wrap(~classification,ncol = 2,scales='free') +
+  geom_hex(bins = 30, size = 0.5) +
+  geom_hline(yintercept = 0, linetype = 'dashed', color = 'grey') +
+  geom_vline(xintercept = 0, linetype = 'dashed', color = 'grey') +
+  scale_fill_viridis_c(name = 'Repeat per Isoform/Kb') +
+  xlab(label = 'log2FoldChange for ExoTIC isolated transcripts') +
+  ylab(label = 'log2FoldChange for ExoRNeasy isolated transcripts') +
+  theme(legend.position = c(0.7,0.25), legend.direction = 'horizontal') #-> Supplemental_Figure.Full_Hex_bins
+
+```
+
+Supplemental Volcano Plot
+
+```{r}
+te_annotation_levels <-
+  list('LINE', 'SINE', 'LTR', 'DNA', 'Simple_repeat')
+
+
+ExoTIC_protein_coding %>%
+  merge(
+    ExoRNeasy_protein_coding,
+    by = c(
+      'gene',
+      'classification',
+      'repName',
+      'repStart',
+      'repClass',
+      'biotype'
+    )
+  ) %>% 
+  filter(biotype %in% c('protein_coding')) %>%
+  filter(repClass != 'Simple_repeat') %>%
+  group_by(gene,
+           biotype,
+           log2FoldChange.x,
+           log2FoldChange.y,
+           classification,
+           repName,
+           repFamily.x,
+           repClass) %>%
+  summarise(total_metric = sum(TE_coverage.x)) %>%
+  distinct() %>%
+  mutate(clade = ifelse(repClass %in% te_alone_annotation_levels[1:5],
+                        repClass,
+                        'other')) %>%
+  mutate(avg_log2FChange = ((log2FoldChange.x + log2FoldChange.y) / 2)) %>%
+  ungroup() %>%
+  mutate(classification = factor(
+    classification,
+    levels = c(
+      'Promoter_Region',
+      'Transcription_Start_Site',
+      '5UTR',
+      'Exon',
+      'Junction',
+      '3UTR',
+      'Transcription_End_Site',
+      '3_End_Region'
+    )
+  )) %>%
+  ggplot(aes(x = avg_log2FChange, y = total_metric, color = clade)) +
+  geom_point(alpha = 0.4) +
+  geom_vline(xintercept = 0,
+             linetype = 'dashed',
+             color = 'black') +
+  labs(y = 'TE_Coverage') +
+  ggrepel::geom_text_repel(aes(label = ifelse(
+    total_metric >= 1 & avg_log2FChange >= 0.5, gene, ''
+  ))) +
+  facet_wrap( ~ classification, ncol = 3, scale = 'free_y') #-> Supplemental_Figure.Full_Volcano_plots
+```
+
+Supplemental Metric bias analysis 
+
+```{r}
+########## change to diff exp by using genoLength
+
+total_extracellular_protein_coding %>% 
+  filter(biotype %in% c('lncRNA','protein_coding')) %>% 
+  select(gene,genoLength,rep_per_iso_kb_mean) %>% 
+  distinct() %>% 
+  filter(gene != 'U6') %>% 
+  ggplot(aes(x=genoLength,y=rep_per_iso_kb_mean))+
+  geom_point(alpha=0.4) +
+  xlim(0, 4000)+
+  ggrepel::geom_text_repel(aes(label=gene)) -> metric_vs_length_4000
+
+total_extracellular_protein_coding %>% 
+  filter(biotype %in% c('lncRNA','protein_coding')) %>% 
+  filter(classification == 'Promoter_Region') %>% 
+  select(gene,genoLength,rep_per_iso_kb_mean) %>% 
+  distinct() %>% 
+  filter(gene != 'U6') %>% 
+  ggplot(aes(x=genoLength,y=rep_per_iso_kb_mean))+
+  geom_point(alpha=0.4) #-> metric_vs_length
+```
+
+Writing to RDS 
+
+```{r}
+
+amg_deliverable <-
+  list(Fig2.PanelA,Fig2.PanelB,Fig2.PanelE,Supplemental_Figure.Full_Boxplots,
+       Supplemental_Figure.Full_Hex_bins, Supplemental_Figure.Full_Volcano_plots)
+
+names(amg_deliverable) <- c('Hex_Bins','Promoter_Region_Box_plots','3prime_UTR_and_Junction',
+                            'Supplemental_Full_Boxplots', 'Supplemental_Full_Hex_bins',
+                            'Supplemental_Full_Volcano_plots')
+
+write_rds(amg_deliverable, file = '/home/dwarriaz/data/amg-kras-inhib/overwriTE_figrues.rds')
+
+added_figures <- 
+  list(metric_vs_length,metric_vs_length_4000)
+
+names(added_figures) <- c('TE_enrichment_metric_vs_Gene_Length',
+                          'TE_enrichment_metric_vs_Gene_Length_xlim:4000')
+
+write_rds(added_figures, file = '/home/dwarriaz/data/amg-kras-inhib/added_overwriTE_figrues.rds')
+
+```
