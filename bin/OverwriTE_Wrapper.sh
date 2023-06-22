@@ -1,10 +1,10 @@
 #!/bin/bash
 mkdir output
 
-python3 File_Compatible.py $1
-
+counter=$(python3 File_Compatible.py $1)
+echo $counter
 start=1
-end=37
+end=$(echo $counter)
 
 for (( c=$start; c<=$end; c++ ))
 do
