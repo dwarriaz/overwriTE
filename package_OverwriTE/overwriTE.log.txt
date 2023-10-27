@@ -1,0 +1,13 @@
+5
+Commencing Batch1
+Creating:output/Batch1_output.csv
+Commencing Batch2
+Creating:output/Batch2_output.csv
+Commencing Batch3
+Creating:output/Batch3_output.csv
+Commencing Batch4
+Creating:output/Batch4_output.csv
+Commencing Batch5
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'inand 
+	wg.chrom = rmsk.genoName and 
+	cast(wg.txStart as signed)-1500 <= cas...' at line 19
