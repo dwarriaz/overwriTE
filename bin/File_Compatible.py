@@ -22,7 +22,8 @@ def main():
     gene_list=gene_list_reader.csvreader()
 
     batchlist = []
-    step = len(gene_list)//20
+    
+    step = 200
     for x in range(0,len(gene_list),step):
         package = gene_list[x:x+step]
         batchlist.append(package)
@@ -39,7 +40,7 @@ def main():
             file.write(final_format)
         counter += 1
 
-    
+    print(counter)     
 
 if __name__ == "__main__":
     main()
