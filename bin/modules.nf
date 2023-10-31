@@ -1,36 +1,67 @@
-process Overwrite_wrapper { 
-cpus 6
-input: 
-    file gene_names
-    file file_Compatible_py
-    file overwritev5
-    file overwritev11
-output: 
-    file ("OverwriTE_annotations.csv")
+process Batch{
+    input: 
+        path inputFile
+    
+    output: 
+        path "batchedQueries/*"
+    shell: 
+        '''
+        mkdir output
+        python3 !{projectDir}/File_Compatible.py !{inputFile}
+        mv output batchedQueries
+        '''
+}
 
+process Query{
+    input:
+        path batchFile
+    output:
+        path "${batchFile}_output.csv"
+    shell:
+        '''
+        
+        query_list=$(cat !{batchFile})
 
-shell:
-'''
-#!/bin/bash
+        mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D hg38 -e \
+        'select name,
+        name2,
+        chrom, 
+        wg.strand,
+        txStart,
+        txEnd,
+        exonCount,
+        exonStarts,
+        exonEnds,
+        genoStart,
+        genoEnd, 
+        repName, 
+        repFamily, 
+        repClass,
+        rmsk.strand,
+        cdsStart,
+        cdsEnd
+        from wgEncodeGencodeBasicV39 as wg, rmsk 
+        where name2 in'$query_list'and 
+        wg.chrom = rmsk.genoName and 
+        cast(wg.txStart as signed)-1500 <= cast(rmsk.genoStart as signed)and
+        cast(wg.txEnd as signed)+1500 >= cast(rmsk.genoEnd as signed);'\
+        > !{batchFile}_sql_out.tsv &&\
+        python3 -u !{projectDir}/OverwriTE_V13.py -SQL !{batchFile}_sql_out.tsv -Output !{batchFile}_output.csv 
+        
+        '''
+}
 
-mkdir output
+process Gather{
+    input:
+        tuple file(batchedOutput)
+        val outputFile
+    output: 
+        path "${outputFile}"
+    shell: 
+        '''
+        echo "!{batchedOutput}"
+        echo 'name,name2,chrom,genoStrand,genoLength,repName,repStart,repLength,repFamily,repClass,repStrand,classification,len_classification,regionLength,compleTE_seq' > !{outputFile}
+        cat !{batchedOutput}|grep -v name,name2,chrom >> !{outputFile}
 
-python3 !{file_Compatible_py} !{gene_names}
-
-start=1
-end=21
-
-for (( c=$start; c<=$end; c++ ))
-do
-	echo 'Commencing Batch'$c
-	## touch output/Batch$c
-	./!{overwritev5} output/Batch$c 
-done
-
-echo 'name,name2,chrom,genoStrand,genoLength,repName,repStart,repLength,repFamily,repClass,repStrand,classification,len_classification' > output/OverwriTE_annotations.csv
-
-cat output/Batch?_output.csv|grep -v name,name2,chrom >> OverwriTE_annotations.csv
-
-
-'''
+        '''
 }
