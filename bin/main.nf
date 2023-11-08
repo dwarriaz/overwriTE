@@ -10,8 +10,8 @@ include{
 workflow
 {
     Batch(file(params.INPUT))
-    workChannel = Batch.out
-    workChannel.view
-    //batchChannel = workChannel | Query
-    //Gather(batchChannel.collect(),'fuckItWeBall')
+    // Batch.out.flatten().view()
+    Query(Batch.out.flatten())
+    Gather(Query.out.collect(),'fuckItWeBall')
 }
+
