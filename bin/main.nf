@@ -10,8 +10,10 @@ include{
 workflow
 {
     Batch(file(params.INPUT))
-    // Batch.out.flatten().view()
-    Query(Batch.out.flatten())
-    Gather(Query.out.collect(),'fuckItWeBall')
+    Batch.out.flatten().view() 
+    
+    /*Query(Batch.out.flatten())
+    Gather(Query.out.collect(),'overwriTE.table.csv')
+    */
 }
 
