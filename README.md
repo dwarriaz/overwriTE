@@ -1,5 +1,5 @@
 # overwriTE
-## Interrogating the influence of Transposable Element (TE) insertions on trasncriptional dynamics   
+## Interrogating the influence of Transposable Element (TE) insertions on transcriptional dynamics   
   
 overwriTE dependencies include: mySQL, python3, R (tidyr, ggextra)    
 
