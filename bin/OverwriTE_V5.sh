@@ -2,7 +2,7 @@
 
 query_list=$(cat $1)
 
-mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D hg38 -e \
+mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D mm39 -e \
     'select name,
 	name2,
 	chrom, 
@@ -20,7 +20,7 @@ mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D hg38 -e \
 	rmsk.strand,
     cdsStart,
     cdsEnd
-    from wgEncodeGencodeBasicV39 as wg, rmsk 
+    from wgEncodeGencodeBasicVM36 as wg, rmsk 
     where name2 in'$query_list'and 
 	wg.chrom = rmsk.genoName and 
 	cast(wg.txStart as signed)-1500 <= cast(rmsk.genoStart as signed)and
