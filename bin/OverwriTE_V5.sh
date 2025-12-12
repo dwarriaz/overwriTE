@@ -26,4 +26,4 @@ mysql --batch --user=genome --host=genome-mysql.cse.ucsc.edu -N -A -D mm39 -e \
 	cast(wg.txStart as signed)-1500 <= cast(rmsk.genoStart as signed)and
 	cast(wg.txEnd as signed)+1500 >= cast(rmsk.genoEnd as signed);'\
     > $1_sql_out.tsv &&\
-     python3 -u OverwriTE_V13.py -SQL $1_sql_out.tsv -Output $1_output.csv 
+     /Users/dwarriaz/miniforge3/envs/playground/bin/python -u OverwriTE_V13.py -SQL $1_sql_out.tsv -Output $1_output.csv 
